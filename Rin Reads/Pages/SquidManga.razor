@@ -1,13 +1,67 @@
 ﻿@page "/squidmanga"
+@inject HttpClient http
+@using Rin_Reads.Book;
+@using Rin_Reads.Book.Preload;
 
 <h3>SquidManga</h3>
 
 <p>
     Begining First test for loading any kind of manga;
     using Squid Girl manga as the manga data to get,
-    for testing purposes of course. (Varient 0)
+    for testing purposes of course. (Version 0)
 </p>
+
+<br />
+
+<img src="https://uploads.mangadex.org/covers/d6a9c184-4cc4-40c6-bc09-11ad4be80079/c3a6864d-87f5-4bde-8494-d15741f47c40.jpg.512.jpg" alt="Image Error" />
+
+@if (manga_ == null)
+{
+    <br />
+    <h1>Loading...</h1>
+}
+else
+{
+    <h1>@manga_.result</h1>
+    <br />
+    @if (aggregationArr != null)
+    {
+
+        @foreach (Result v in aggregationArr)
+        {
+            <ul>
+                <li>
+                    <h3>@v.data.attributes.volume</h3>
+                </li>
+            </ul>
+        }
+    }
+    else
+    {
+        <h2>Loading...</h2>
+    }
+
+}
 
 @code {
 
+    private string SquidID = "d6a9c184-4cc4-40c6-bc09-11ad4be80079";
+
+    private Cover cover;
+    private Manga_Ika manga_;
+    private Result[] aggregationArr;
+
+    protected override async Task OnInitializedAsync()
+    {
+        //Test d6a9c184-4cc4-40c6-bc09-11ad4be80079/c3a6864d-87f5-4bde-8494-d15741f47c40
+        //string mangaID = "d6a9c184-4cc4-40c6-bc09-11ad4be80079", coverID = "c3a6864d-87f5-4bde-8494-d15741f47c40";
+        //cover = await http.GetFromJsonAsync<Cover>(Links.GetCoverLink(mangaID, coverID));
+
+        //Squid specific implying preload, this will be improved in future...
+        //d6a9c184-4cc4-40c6-bc09-11ad4be80079
+        manga_ = await http.GetFromJsonAsync<Manga_Ika>(GetLinks.MangaLink + SquidID);
+
+        aggregationArr = await http.GetFromJsonAsync<Result[]>(GetLinks.GetAggregate(SquidID));
+
+    }
 }
